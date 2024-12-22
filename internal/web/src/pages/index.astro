@@ -1,0 +1,22 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Login from "../components/Login.svelte";
+import { auth } from "../stores/auth";
+
+const isAuthenticated = auth.isAuthenticated();
+---
+
+<Layout title="LocalHaven CMS">
+  <main>
+    {
+      !isAuthenticated ? (
+        <Login client:load />
+      ) : (
+        <div class="dashboard">
+          <h1>Welcome to LocalHaven CMS</h1>
+          <AssetList client:load />
+        </div>
+      )
+    }
+  </main>
+</Layout>

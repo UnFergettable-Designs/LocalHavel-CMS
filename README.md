@@ -1,5 +1,3 @@
-# LocalHaven CMS
-
 **LocalHaven CMS** is a local-first content management system that enables seamless content creation, asset management, and collaboration across devices—even offline. Built with Go and Astro/Svelte, it provides robust handling of digital assets while maintaining data consistency across all devices.
 
 [![License](https://img.shields.io/badge/license-BSD--3-blue.svg)](LICENSE)
@@ -264,7 +262,7 @@ pnpm dev
   - [ ] Priority queues
   - [ ] Bandwidth awareness
 - [ ] Advanced Security
-  - [ ] E2E encryption
+:wq  - [ ] E2E encryption
   - [ ] Key management
 
 ## Contributing
@@ -300,3 +298,4 @@ All rights reserved.
 ---
 
 Built with ❤️ for teams who value efficiency and collaboration.
+
