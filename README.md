@@ -16,33 +16,33 @@
    git clone https://github.com/yourusername/localhaven-cms.git
 ```
 
-	2.	Navigate to the Project Directory:
+2. **Navigate to the Project Directory:**
 ```bash
 cd localhaven-cms
 ```
 
 
-	3.	Install Dependencies:
+3. **Install Dependencies:**
 ```bash
 pnpm install
 ```
 
-	4.	Start the Application:
+4. **Start the Application:**
 ```bash
 pnpm start
 ```
 
 
-##Usage
-	- Access the CMS:
+## Usage
+- Access the CMS:
 Open your browser and navigate to http://localhost:3000 to start managing your content.
-	-	Collaborate:
+- Collaborate:
 Share your local network IP with collaborators to enable real-time editing.
 
-##Contributing
+## Contributing
 
 We welcome contributions! Please read our Contributing Guidelines for more information.
 
-##License
+## License
 
-This project is licensed under the MIT License. See the LICENSE file for details.
+This project is licensed under the BSD-3 license. See the LICENSE file for details.
