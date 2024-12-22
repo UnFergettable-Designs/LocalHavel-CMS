@@ -1,366 +1,302 @@
 # LocalHaven CMS
 
-**LocalHaven CMS** is a local-first content management system designed for modern marketing teams, enabling seamless content creation, asset management, and client collaboration - whether online or offline. Built with Go and Astro/Svelte, it provides robust handling of various marketing assets while maintaining data consistency across all devices.
+**LocalHaven CMS** is a local-first content management system that enables seamless content creation, asset management, and collaboration across devices—even offline. Built with Go and Astro/Svelte, it provides robust handling of digital assets while maintaining data consistency across all devices.
 
-## Marketing Agency Use Cases
+[![License](https://img.shields.io/badge/license-BSD--3-blue.svg)](LICENSE)
+[![Go Version](https://img.shields.io/badge/go-1.21%2B-blue.svg)](https://golang.org/doc/devel/release.html)
+[![Node Version](https://img.shields.io/badge/node-22.0.0%2B-brightgreen.svg)](https://nodejs.org/)
+[![pnpm](https://img.shields.io/badge/pnpm-8.15.0%2B-orange.svg)](https://pnpm.io/)
 
-### Content Creation Teams
-**Example: Boutique Digital Marketing Agency**
-- Teams creating content for multiple clients simultaneously
-- Need to maintain separate brand assets and guidelines
-- Requires quick access to approved client assets
-- Requirements:
-  - Brand asset organization by client
+## Why LocalHaven CMS?
+
+### Key Benefits
+- **Work Anywhere:** True offline-first architecture ensures work continues without interruption
+- **Real-Time Collaboration:** Simultaneous editing with instant updates when connected
+- **Asset-Focused:** Built for teams working with diverse digital content
+- **Stakeholder-Friendly:** Easy-to-use review and approval systems
+- **Performance-First:** Lightning-fast local operations with efficient syncing
+
+### Perfect For
+- **Creative Teams**
+  - Manage digital assets efficiently
+  - Organize projects and timelines
+  - Streamline review workflows
+  
+- **Content Teams**
+  - Coordinate multi-channel content
+  - Manage assets across platforms
+  - Collaborate on content calendars
+  
+- **Distributed Teams**
+  - Work effectively across time zones
+  - Handle large media files
+  - Maintain version control
+  
+- **Client Services**
+  - Streamlined review processes
+  - Clear approval workflows
+  - Secure asset sharing
+
+## Features
+
+### Core Capabilities
+- **Local-First Architecture**
+  - Offline work capabilities
+  - Automatic synchronization
+  - Conflict-free data management
+  
+- **Real-Time Collaboration**
+  - Simultaneous editing
+  - Presence awareness
+  - Change tracking
+  
+- **Asset Management**
+  - Multi-format support
+  - Version control
+  - Smart categorization
+  - Quick-access libraries
+
+### Team-Focused Features
+- **Workspace Management**
+  - Team workspaces
+  - Resource libraries
+  - Asset organization
   - Template management
-  - Content approval workflows
-  - Asset version tracking
 
-### Social Media Management
-**Example: Social Media Marketing Team**
-- Managing multiple social campaigns
-- Need to organize visual assets by platform
-- Collaborative content calendar management
-- Requirements:
-  - Image/video asset management
-  - Content scheduling interface
-  - Platform-specific asset variants
-  - Campaign organization tools
-
-### Client Collaboration
-**Example: Full-Service Marketing Agency**
-- Client review and approval processes
-- Shared access to specific project assets
-- Real-time collaboration on campaigns
-- Requirements:
-  - Client access controls
-  - Review/approval workflows
-  - Comment and feedback system
-  - Asset sharing capabilities
-
-### Remote Creative Teams
-**Example: Distributed Marketing Agency**
-- Design teams working across locations
-- Large file collaboration needs
-- Asset version management
-- Requirements:
-  - Offline design file management
-  - Large file synchronization
-  - Version control for designs
-  - Collaborative feedback tools
-
-## Marketing-Specific Features
-
-### Asset Management
-- **Brand Organization:**
-  - Separate workspaces per client/brand
-  - Brand guideline documentation
-  - Asset categorization by campaign
-  - Quick-access asset libraries
-
-### Workflow Management
-- **Campaign Organization:**
-  - Project-based asset grouping
-  - Campaign timelines
+- **Project Tools**
+  - Resource grouping
+  - Timeline management
   - Status tracking
   - Task assignment
 
-### Collaboration Tools
-- **Review & Approval:**
-  - Client review portals
+- **Collaboration Tools**
+  - Stakeholder review portals
   - Approval workflows
   - Comment threading
   - Version comparison
 
-### Content Creation
-- **Template System:**
-  - Reusable content templates
-  - Brand-specific templates
-  - Asset customization
-  - Quick export options
+## Technical Architecture
 
-## Features
+### CRDT Implementation
+```go
+type NodeID string
 
-### Core Functionality
-- **Local-First Architecture:** Work offline with automatic synchronization when reconnected
-- **Real-Time Collaboration:** Multiple users can edit content simultaneously with instant updates
-- **CRDT-Based Synchronization:** Uses Automerge for conflict-free data synchronization
-- **WebSocket Integration:** Provides efficient, real-time communication between frontend and backend
+type VersionVector map[NodeID]uint64
 
-### Content Management
-- **Multiple Document Types Support:**
-  - Text documents with real-time collaborative editing
-  - Image files with thumbnail generation
-  - PDF documents with preview generation
-- **Metadata Management:** CRDT-enabled metadata for all document types
-- **Content-Addressed Storage:** Efficient blob storage for binary content
-- **Thumbnail Generation:** Automatic thumbnail creation for images and PDFs
+type Operation struct {
+    ID        uuid.UUID
+    NodeID    NodeID
+    Timestamp hlc.Timestamp
+    Vector    VersionVector
+    Type      OperationType
+    Payload   []byte
+}
 
-### Technical Architecture
-- **Backend:** Go with Echo framework
-- **Frontend:** Astro with Svelte islands
-- **Storage:** 
-  - CRDT-based metadata storage using Automerge
-  - Local blob storage for binary content
-  - Content-addressed storage system
+type State struct {
+    Vector    VersionVector
+    Data      map[string]interface{}
+    Tombstone map[string]hlc.Timestamp
+}
+```
 
-## Installation
+Key CRDT Features:
+- Hybrid logical clocks for causality tracking
+- Per-node version vectors for conflict resolution
+- Operation-based CRDT for efficient network usage
+- Tombstone management for deletions
+- Automatic conflict resolution
 
-1. **Clone the Repository:**
+### Storage Management
+```go
+type Chunk struct {
+    Hash     []byte
+    Size     int64
+    Encoding ChunkEncoding
+    Data     []byte
+}
+
+type Asset struct {
+    ID          uuid.UUID
+    ChunkHashes [][]byte
+    Metadata    AssetMetadata
+    Version     uint64
+    Priority    SyncPriority
+}
+```
+
+Storage Features:
+- Content-addressed storage for deduplication
+- Variable-sized chunking for efficient updates
+- Progressive loading support
+- Prioritized sync queue
+- Local caching with LRU eviction
+- Bandwidth-aware synchronization
+
+### Security Architecture
+```go
+type EncryptionKey struct {
+    ID        uuid.UUID
+    Algorithm string
+    Key       []byte
+    Version   uint64
+}
+
+type Permission struct {
+    ResourceID uuid.UUID
+    RoleID     uuid.UUID
+    Actions    []Action
+    Conditions []Condition
+}
+```
+
+Security Features:
+- End-to-end encryption for sensitive data
+- Role-based access control (RBAC)
+- Granular permission system
+- Comprehensive audit logging
+- Secure key management
+- Zero-knowledge proof capabilities
+
+## Project Structure
+```
+.
+├── api/                    # Backend API handlers
+│   ├── assets/            # Asset management endpoints
+│   ├── collaboration/     # Real-time collaboration
+│   ├── workflows/         # Workflow management
+│   └── security/          # Authentication & authorization
+├── internal/              # Core backend logic
+│   ├── crdt/             # CRDT implementation
+│   │   ├── clock/        # Hybrid logical clock
+│   │   ├── operation/    # CRDT operations
+│   │   └── store/        # State management
+│   ├── storage/          # Storage handlers
+│   │   ├── chunk/        # Chunk management
+│   │   ├── sync/         # Sync coordination
+│   │   └── cache/        # Caching system
+│   └── security/         # Security implementation
+├── content/              # Content management
+│   ├── projects/         # Project management
+│   ├── workspaces/       # Workspace management
+│   └── workflows/        # Workflow definitions
+└── web/                  # Frontend application
+    ├── src/
+    │   ├── components/   # Reusable components
+    │   ├── stores/       # State management
+    │   └── utils/        # Utility functions
+    └── public/           # Static assets
+```
+
+## Prerequisites
+
+- Go 1.21+
+- Node.js 22.0.0+ (LTS)
+- pnpm 8.15.0+
+- SQLite 3.39+ (for development)
+
+## Development Setup
+
+1. Clone the repository:
 ```bash
 git clone https://github.com/yourusername/localhaven-cms.git
 cd localhaven-cms
 ```
 
-2. **Install Backend Dependencies:**
+2. Install backend dependencies:
 ```bash
 go mod download
 ```
 
-3. **Install Frontend Dependencies:**
+3. Install frontend dependencies:
 ```bash
 cd web
-npm install
+pnpm install
 ```
 
-## Development Setup
-
-### Backend
-1. **Start the Go server:**
+4. Configure development environment:
 ```bash
+cp .env.example .env
+# Edit .env with your settings:
+# - NODE_ENV=development
+# - STORAGE_PATH=./data
+# - ENCRYPTION_KEY=your-dev-key
+# - JWT_SECRET=your-jwt-secret
+```
+
+5. Initialize the development database:
+```bash
+go run cmd/migrate/main.go up
+```
+
+6. Start development servers:
+```bash
+# Terminal 1 - Backend
 go run main.go
-```
-The server will start on `localhost:8080`
 
-### Frontend
-1. **Start the Astro development server:**
-```bash
+# Terminal 2 - Frontend
 cd web
-npm run dev
-```
-The development server will start on `localhost:3000`
-
-## Project Structure
-```
-.
-├── api/
-│   ├── handlers/      # HTTP and WebSocket handlers
-│   ├── middleware/    # Authentication and request middleware
-│   └── routes/        # API route definitions
-├── internal/
-│   ├── crdt/         # CRDT implementation
-│   ├── storage/      # Blob storage implementation
-│   └── types/        # Core type definitions
-├── marketing/         # Marketing-specific features
-│   ├── campaigns/    # Campaign management
-│   ├── brands/       # Brand asset management
-│   └── workflows/    # Approval workflows
-├── web/              # Frontend application
-│   ├── src/
-│   │   ├── components/
-│   │   ├── layouts/
-│   │   └── pages/
-│   └── public/
-└── main.go           # Application entry point
+pnpm dev
 ```
 
-## Project Structure
-```
-.
-├── api/
-│   ├── handlers/      # HTTP and WebSocket handlers
-│   ├── middleware/    # Authentication and request middleware
-│   └── routes/        # API route definitions
-├── internal/
-│   ├── crdt/         # CRDT implementation
-│   ├── storage/      # Blob storage implementation
-│   └── types/        # Core type definitions
-├── marketing/         # Marketing-specific features
-│   ├── campaigns/    # Campaign management
-│   ├── brands/       # Brand asset management
-│   └── workflows/    # Approval workflows
-├── web/              # Frontend application
-│   ├── src/
-│   │   ├── components/
-│   │   ├── layouts/
-│   │   └── pages/
-│   └── public/
-└── main.go           # Application entry point
-```
-## Configuration
+## Implementation Roadmap
 
-The application can be configured through environment variables:
+### Phase 1: Core Infrastructure (Weeks 1-6)
+- [ ] CRDT Implementation
+  - [ ] Hybrid logical clock
+  - [ ] Operation-based CRDT
+  - [ ] Version vectors
+- [ ] Storage System
+  - [ ] Content-addressed store
+  - [ ] Chunking system
+  - [ ] Basic sync
 
-```env
-PORT=8080                    # API server port
-STORAGE_PATH="./data"        # Path for blob storage
-MAX_UPLOAD_SIZE=10000000     # Maximum upload size in bytes
-```
+### Phase 2: Basic Features (Weeks 7-12)
+- [ ] Asset Management
+  - [ ] Upload/download
+  - [ ] Basic versioning
+  - [ ] Simple search
+- [ ] Collaboration
+  - [ ] Real-time editing
+  - [ ] Presence awareness
 
-## API Endpoints
-
-- `GET /api/health` - Health check endpoint
-- `GET /ws` - WebSocket connection for real-time updates
-- `POST /api/documents` - Create new document
-- `GET /api/documents/:id` - Retrieve document
-- `PUT /api/documents/:id` - Update document
-- `DELETE /api/documents/:id` - Delete document
-- `GET /api/documents` - List documents with filtering
+### Phase 3: Advanced Features (Weeks 13-18)
+- [ ] Enhanced Sync
+  - [ ] Priority queues
+  - [ ] Bandwidth awareness
+- [ ] Advanced Security
+  - [ ] E2E encryption
+  - [ ] Key management
 
 ## Contributing
 
-We welcome contributions! Please read our Contributing Guidelines (coming soon) for more 
- 
-## Roadmap
+We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.
 
-### Phase 1: Core Marketing Features
-- [ ] Brand asset management
-- [ ] Basic campaign organization
-- [ ] Client access controls
-- [ ] Template system
-- [ ] Basic PDF viewing and organization
+### Development Workflow
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to your fork
+5. Submit a pull request
 
-### Phase 2: Collaboration & Review
-- [ ] Review and approval workflows
-- [ ] Client feedback system
-- [ ] Team collaboration tools
-- [ ] Version control
-- [ ] Basic PDF annotation (comments and highlights)
-
-### Phase 3: Advanced PDF Collaboration
-- [ ] Real-time multiplayer PDF editing
-  - [ ] Simultaneous user editing
-  - [ ] Cursor presence and user awareness
-  - [ ] Advanced annotation tools (drawings, shapes)
-  - [ ] Page synchronization between users
-- [ ] PDF Performance Optimization
-  - [ ] Smart page caching
-  - [ ] Binary diff updates
-  - [ ] Bandwidth optimization
-  - [ ] Large file handling
-- [ ] PDF Workflow Integration
-  - [ ] Proof review system
-  - [ ] Design approval workflows
-  - [ ] Change tracking
-  - [ ] Version comparison
-- [ ] PDF Asset Management
-  - [ ] Template-based generation
-  - [ ] Batch processing
-  - [ ] Asset organization
-  - [ ] Quick proof generation
-
-### Phase 4: Advanced Marketing Features
-- [ ] Campaign analytics integration
-- [ ] Advanced asset transformations
-- [ ] AI-powered asset tagging
-- [ ] Automated brand compliance
-- [ ] Social media scheduling
-- [ ] Performance reporting
-- [ ] Advanced PDF Features
-  - [ ] Digital signatures
-  - [ ] Form field handling
-  - [ ] PDF merging and splitting
-  - [ ] Automated PDF processing
-
-### Phase 5: Enterprise Marketing
-- [ ] Multi-brand management
-- [ ] Advanced workflows
-- [ ] Asset performance tracking
-- [ ] Integration with marketing tools
-- [ ] Custom branded portals
-- [ ] Enterprise PDF Features
-  - [ ] PDF accessibility compliance
-  - [ ] Advanced security controls
-  - [ ] Audit logging for PDF changes
-  - [ ] PDF archiving and retention policies
-
-### Future Considerations
-- [ ] Mobile PDF editing
-- [ ] Offline PDF processing
-- [ ] AI-powered PDF analysis
-- [ ] PDF automation APIs
-- [ ] Integration with design tools
-- [ ] Advanced compression algorithms
-- [ ] PDF form workflow automation
-
-## Implementation Priorities
-
-### Near-term PDF Goals
-1. **Basic PDF Management**
-   - Secure storage and organization
-   - Basic viewing capabilities
-   - Simple annotation tools
-   - Version tracking
-
-2. **Collaboration Foundation**
-   - User presence system
-   - Real-time sync architecture
-   - Basic concurrent editing
-   - Comment system
-
-3. **Performance Groundwork**
-   - Caching system
-   - Page-by-page loading
-   - Network optimization
-   - Storage efficiency
-
-### Marketing-Driven PDF Features
-1. **Review Efficiency**
-   - Quick markup tools
-   - Approval status tracking
-   - Change visualization
-   - Client access portal
-
-2. **Asset Management**
-   - PDF template system
-   - Batch processing
-   - Asset categorization
-   - Version management
-
-3. **Workflow Integration**
-   - Status tracking
-   - Task automation
-   - Notification system
-   - Analytics integration
-
-- [ ] Integration with marketing tools
-- [ ] Custom branded portals
-
-## Marketing-Specific Configuration
-
-```env
-PORT=8080                    # API server port
-STORAGE_PATH="./data"        # Path for blob storage
-MAX_UPLOAD_SIZE=10000000     # Maximum upload size in bytes
-MAX_CLIENTS=50              # Maximum number of client workspaces
-ENABLE_CLIENT_PORTAL=true   # Enable client review portal
-```
-
-## Example Marketing Workflows
-
-1. **Content Creation Flow:**
-```
-Draft → Internal Review → Client Review → Revisions → Approval → Publication
-```
-
-2. **Asset Management Flow:**
-```
-Upload → Auto-tagging → Brand Validation → Distribution → Usage Tracking
-```
-
-3. **Campaign Flow:**
-```
-Planning → Asset Creation → Review → Scheduling → Execution → Analysis
-```
+### Code Style
+- Go: Follow the official Go style guide
+- TypeScript/JavaScript: ESLint + Prettier
+- Commit messages: Conventional Commits
 
 ## License
 
-This project is licensed under the BSD 3-Clause License. See the LICENSE file for details.
+This project is licensed under the BSD 3-Clause License - see the [LICENSE](LICENSE) file for details.
 
 Copyright (c) 2024, LocalHaven CMS Contributors
 All rights reserved.
 
-Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+## Support
 
-1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
-2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
-3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+- Documentation: [docs.localhavencms.com](https://docs.localhavencms.com)
+- Issues: GitHub Issues
+- Community: [Discord](https://discord.gg/localhavencms)
+- Email: support@localhavencms.com
+
+---
+
+Built with ❤️ for teams who value efficiency and collaboration.
