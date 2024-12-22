@@ -78,7 +78,66 @@
   - Asset customization
   - Quick export options
 
-[Previous technical sections remain the same...]
+## Features
+
+### Core Functionality
+- **Local-First Architecture:** Work offline with automatic synchronization when reconnected
+- **Real-Time Collaboration:** Multiple users can edit content simultaneously with instant updates
+- **CRDT-Based Synchronization:** Uses Automerge for conflict-free data synchronization
+- **WebSocket Integration:** Provides efficient, real-time communication between frontend and backend
+
+### Content Management
+- **Multiple Document Types Support:**
+  - Text documents with real-time collaborative editing
+  - Image files with thumbnail generation
+  - PDF documents with preview generation
+- **Metadata Management:** CRDT-enabled metadata for all document types
+- **Content-Addressed Storage:** Efficient blob storage for binary content
+- **Thumbnail Generation:** Automatic thumbnail creation for images and PDFs
+
+### Technical Architecture
+- **Backend:** Go with Echo framework
+- **Frontend:** Astro with Svelte islands
+- **Storage:** 
+  - CRDT-based metadata storage using Automerge
+  - Local blob storage for binary content
+  - Content-addressed storage system
+
+## Installation
+
+1. **Clone the Repository:**
+```bash
+git clone https://github.com/yourusername/localhaven-cms.git
+cd localhaven-cms
+```
+
+2. **Install Backend Dependencies:**
+```bash
+go mod download
+```
+
+3. **Install Frontend Dependencies:**
+```bash
+cd web
+npm install
+```
+
+## Development Setup
+
+### Backend
+1. **Start the Go server:**
+```bash
+go run main.go
+```
+The server will start on `localhost:8080`
+
+### Frontend
+1. **Start the Astro development server:**
+```bash
+cd web
+npm run dev
+```
+The development server will start on `localhost:3000`
 
 ## Project Structure
 ```
@@ -103,6 +162,53 @@
 │   └── public/
 └── main.go           # Application entry point
 ```
+
+## Project Structure
+```
+.
+├── api/
+│   ├── handlers/      # HTTP and WebSocket handlers
+│   ├── middleware/    # Authentication and request middleware
+│   └── routes/        # API route definitions
+├── internal/
+│   ├── crdt/         # CRDT implementation
+│   ├── storage/      # Blob storage implementation
+│   └── types/        # Core type definitions
+├── marketing/         # Marketing-specific features
+│   ├── campaigns/    # Campaign management
+│   ├── brands/       # Brand asset management
+│   └── workflows/    # Approval workflows
+├── web/              # Frontend application
+│   ├── src/
+│   │   ├── components/
+│   │   ├── layouts/
+│   │   └── pages/
+│   └── public/
+└── main.go           # Application entry point
+```
+## Configuration
+
+The application can be configured through environment variables:
+
+```env
+PORT=8080                    # API server port
+STORAGE_PATH="./data"        # Path for blob storage
+MAX_UPLOAD_SIZE=10000000     # Maximum upload size in bytes
+```
+
+## API Endpoints
+
+- `GET /api/health` - Health check endpoint
+- `GET /ws` - WebSocket connection for real-time updates
+- `POST /api/documents` - Create new document
+- `GET /api/documents/:id` - Retrieve document
+- `PUT /api/documents/:id` - Update document
+- `DELETE /api/documents/:id` - Delete document
+- `GET /api/documents` - List documents with filtering
+
+## Contributing
+
+We welcome contributions! Please read our Contributing Guidelines (coming soon) for more 
  
 ## Roadmap
 
